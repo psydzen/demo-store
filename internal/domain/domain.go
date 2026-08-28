@@ -135,6 +135,26 @@ type ScoreRow struct {
 	Pending    int
 }
 
+// AnswerReview is one line of the breakdown a player sees after finishing:
+// what was asked, what they answered and how it was scored.
+type AnswerReview struct {
+	RoundTitle   string
+	QuestionText string
+	Kind         QuestionKind
+	// Answer is the option text for a choice question, or the typed text.
+	Answer string
+	// IsCorrect and Points are nil while the answer waits for review.
+	IsCorrect *bool
+	Points    *int
+}
+
+// Pending reports whether the answer still waits for an admin decision.
+func (a AnswerReview) Pending() bool { return a.IsCorrect == nil }
+
+// Correct reports whether the answer was accepted. It is false for a pending
+// answer, so pair it with Pending when rendering.
+func (a AnswerReview) Correct() bool { return a.IsCorrect != nil && *a.IsCorrect }
+
 // AttemptResult summarises a finished attempt for the player.
 type AttemptResult struct {
 	Quiz     Quiz

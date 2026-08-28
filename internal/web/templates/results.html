@@ -19,5 +19,35 @@
   </section>
 </div>
 
+<section class="card">
+  <h2 class="column-title">Ваши ответы</h2>
+  {{if not .Answers}}
+    <p class="muted">Ответов нет.</p>
+  {{else}}
+    <ul class="answers">
+      {{range .Answers}}
+        <li class="answer-row">
+          <div class="answer-main">
+            <p class="progress">{{.RoundTitle}}</p>
+            <p class="answer-question">{{.QuestionText}}</p>
+            <p class="answer-given">{{.Answer}}</p>
+          </div>
+          <div class="answer-verdict">
+            {{if .Pending}}
+              <span class="verdict waiting">на проверке</span>
+            {{else if .Correct}}
+              <span class="verdict good">верно</span>
+              <span class="points">+{{.Points}}</span>
+            {{else}}
+              <span class="verdict bad">неверно</span>
+              <span class="points">{{.Points}}</span>
+            {{end}}
+          </div>
+        </li>
+      {{end}}
+    </ul>
+  {{end}}
+</section>
+
 <p><a class="linkish" href="/quizzes">К списку квизов</a></p>
 {{end}}

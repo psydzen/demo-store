@@ -349,6 +349,7 @@ type resultsPage struct {
 	Answered    int
 	Pending     int
 	Leaderboard leaderboardView
+	Answers     []domain.AnswerReview
 }
 
 // handleResults shows what the player scored.
@@ -373,6 +374,11 @@ func (s *Server) handleResults(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	answers, err := s.db.AttemptAnswers(r.Context(), attempt.ID)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 
 	s.mustRender(w, r, http.StatusOK, "results", resultsPage{
 		base:        s.baseOf(r),
@@ -381,6 +387,7 @@ func (s *Server) handleResults(w http.ResponseWriter, r *http.Request) {
 		Answered:    answered,
 		Pending:     pending,
 		Leaderboard: board,
+		Answers:     answers,
 	})
 }
 

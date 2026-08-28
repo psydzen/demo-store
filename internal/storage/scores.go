@@ -57,6 +57,41 @@ func (db *DB) AttemptScore(ctx context.Context, attemptID int64) (points, answer
 	return points, answered, pending, nil
 }
 
+// AttemptAnswers returns the player's answers in the order they were asked,
+// with the verdict and the points each one earned.
+func (db *DB) AttemptAnswers(ctx context.Context, attemptID int64) ([]domain.AnswerReview, error) {
+	const query = `
+		SELECT r.title, q.text, q.kind,
+		       COALESCE(o.text, resp.free_text),
+		       resp.is_correct, resp.points_awarded
+		FROM responses resp
+		JOIN questions q ON q.id = resp.question_id
+		JOIN rounds r ON r.id = q.round_id
+		LEFT JOIN answer_options o ON o.id = resp.option_id
+		WHERE resp.attempt_id = $1
+		ORDER BY r.position, r.id, q.position, q.id`
+
+	rows, err := db.pool.Query(ctx, query, attemptID)
+	if err != nil {
+		return nil, fmt.Errorf("attempt answers: %w", err)
+	}
+	defer rows.Close()
+
+	var out []domain.AnswerReview
+	for rows.Next() {
+		var a domain.AnswerReview
+		err := rows.Scan(&a.RoundTitle, &a.QuestionText, &a.Kind, &a.Answer, &a.IsCorrect, &a.Points)
+		if err != nil {
+			return nil, fmt.Errorf("attempt answers: %w", err)
+		}
+		out = append(out, a)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("attempt answers: %w", err)
+	}
+	return out, nil
+}
+
 // PendingReviews lists the free-text answers waiting for an admin decision,
 // oldest first, together with the hint the quiz author left.
 func (db *DB) PendingReviews(ctx context.Context) ([]domain.PendingReview, error) {
