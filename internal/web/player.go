@@ -89,7 +89,10 @@ type quizCard struct {
 
 type quizzesPage struct {
 	base
-	Cards []quizCard
+	// Active holds the quizzes the player can still play, Finished the ones
+	// already completed. They are shown as two columns side by side.
+	Active   []quizCard
+	Finished []quizCard
 }
 
 // handleQuizzes lists the quizzes open to the player.
@@ -107,7 +110,7 @@ func (s *Server) handleQuizzes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cards := make([]quizCard, 0, len(quizzes))
+	page := quizzesPage{base: s.baseOf(r)}
 	for _, q := range quizzes {
 		card := quizCard{Quiz: q}
 		if a, ok := attempts[q.ID]; ok {
@@ -116,10 +119,14 @@ func (s *Server) handleQuizzes(w http.ResponseWriter, r *http.Request) {
 			card.Started = true
 			card.Finished = a.FinishedAt != nil
 		}
-		cards = append(cards, card)
+		if card.Finished {
+			page.Finished = append(page.Finished, card)
+		} else {
+			page.Active = append(page.Active, card)
+		}
 	}
 
-	s.mustRender(w, r, http.StatusOK, "quizzes", quizzesPage{base: s.baseOf(r), Cards: cards})
+	s.mustRender(w, r, http.StatusOK, "quizzes", page)
 }
 
 // handleStartQuiz creates the player's attempt and opens the first question.
