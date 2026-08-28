@@ -1,0 +1,16 @@
+{{define "title"}}Результат{{end}}
+{{define "content"}}
+<section class="card narrow">
+  <h1>{{.Quiz.Title}}</h1>
+  <p class="score">{{.Points}}</p>
+  <p class="muted">баллов набрано</p>
+  <p>Проверено ответов: {{.Answered}}</p>
+  {{if gt .Pending 0}}
+    <p class="pending">Ещё {{.Pending}} ответ(ов) ждут проверки администратором — баллы за них появятся позже.</p>
+  {{end}}
+  <div class="row">
+    <a class="button" href="/leaderboard/{{.Quiz.ID}}">Рейтинг</a>
+    <a class="linkish" href="/quizzes">К списку квизов</a>
+  </div>
+</section>
+{{end}}

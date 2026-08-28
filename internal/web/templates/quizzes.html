@@ -1,0 +1,27 @@
+{{define "title"}}Мои квизы{{end}}
+{{define "content"}}
+<h1>Доступные квизы</h1>
+{{if not .Cards}}
+  <p class="muted">Пока нет открытых квизов. Загляните позже.</p>
+{{end}}
+<ul class="cards">
+  {{range .Cards}}
+    <li class="card">
+      <h2>{{.Quiz.Title}}</h2>
+      {{with .Quiz.Description}}<p class="muted">{{.}}</p>{{end}}
+      <div class="row">
+        {{if .Finished}}
+          <a class="button" href="/results/{{.Attempt.ID}}">Результат</a>
+        {{else if .Started}}
+          <a class="button" href="/play/{{.Attempt.ID}}">Продолжить</a>
+        {{else}}
+          <form method="post" action="/quizzes/{{.Quiz.ID}}/start">
+            <button type="submit">Начать</button>
+          </form>
+        {{end}}
+        <a class="linkish" href="/leaderboard/{{.Quiz.ID}}">Рейтинг</a>
+      </div>
+    </li>
+  {{end}}
+</ul>
+{{end}}

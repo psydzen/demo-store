@@ -1,0 +1,80 @@
+{{define "quiz_structure"}}
+<div id="structure">
+  {{$quizID := .Quiz.ID}}
+
+  {{if not .Rounds}}
+    <p class="muted">В квизе пока нет раундов.</p>
+  {{end}}
+
+  {{range .Rounds}}
+    <section class="card round">
+      <div class="row spread">
+        <h2>{{.Round.Position}}. {{.Round.Title}}</h2>
+        <button class="danger small"
+                hx-post="/admin/rounds/{{.Round.ID}}/delete"
+                hx-target="#structure" hx-swap="outerHTML"
+                hx-confirm="Удалить раунд со всеми вопросами?">Удалить раунд</button>
+      </div>
+
+      {{range .Questions}}
+        <article class="question">
+          <div class="row spread">
+            <h3>{{.Position}}. {{.Text}}</h3>
+            <button class="danger small"
+                    hx-post="/admin/questions/{{.ID}}/delete"
+                    hx-target="#structure" hx-swap="outerHTML"
+                    hx-confirm="Удалить вопрос?">Удалить</button>
+          </div>
+          <p class="progress">
+            {{if eq .Kind "choice"}}выбор из вариантов{{else}}свободный ввод{{end}}
+            · верно +{{.PointsCorrect}} · неверно {{.PointsWrong}}
+          </p>
+          {{with .AdminHint}}<p class="hint">Подсказка проверяющему: {{.}}</p>{{end}}
+
+          {{if eq .Kind "choice"}}
+            <ul class="options">
+              {{range .Options}}
+                <li>
+                  <span class="{{if .IsCorrect}}correct{{end}}">{{.Text}}</span>
+                  {{if .IsCorrect}}<span class="tick">верный</span>{{end}}
+                  <button class="linkbtn"
+                          hx-post="/admin/options/{{.ID}}/delete"
+                          hx-target="#structure" hx-swap="outerHTML">убрать</button>
+                </li>
+              {{end}}
+            </ul>
+            <form class="row" hx-post="/admin/questions/{{.ID}}/options"
+                  hx-target="#structure" hx-swap="outerHTML">
+              <input type="text" name="text" placeholder="Вариант ответа" required>
+              <label class="inline"><input type="checkbox" name="is_correct"> верный</label>
+              <button type="submit" class="small">Добавить вариант</button>
+            </form>
+          {{end}}
+        </article>
+      {{end}}
+
+      <form class="stack new-question"
+            hx-post="/admin/rounds/{{.Round.ID}}/questions"
+            hx-target="#structure" hx-swap="outerHTML">
+        <input type="text" name="text" placeholder="Текст вопроса" required>
+        <div class="row">
+          <select name="kind">
+            <option value="choice">Выбор из вариантов</option>
+            <option value="free">Свободный ввод</option>
+          </select>
+          <input type="number" name="points_correct" value="1" title="Баллы за верный ответ">
+          <input type="number" name="points_wrong" value="0" title="Баллы за неверный ответ">
+        </div>
+        <input type="text" name="admin_hint" placeholder="Подсказка проверяющему (для свободного ввода)">
+        <button type="submit" class="small">Добавить вопрос</button>
+      </form>
+    </section>
+  {{end}}
+
+  <form class="row" hx-post="/admin/quizzes/{{$quizID}}/rounds"
+        hx-target="#structure" hx-swap="outerHTML">
+    <input type="text" name="title" placeholder="Название раунда" required>
+    <button type="submit">Добавить раунд</button>
+  </form>
+</div>
+{{end}}

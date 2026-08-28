@@ -1,0 +1,25 @@
+{{define "title"}}Рейтинг{{end}}
+{{define "content"}}
+<h1>Рейтинг — {{.Quiz.Title}}</h1>
+{{if not .Rows}}
+  <p class="muted">Этот квиз ещё никто не проходил.</p>
+{{else}}
+<table class="grid">
+  <thead>
+    <tr><th>#</th><th>Игрок</th><th>Баллы</th><th>Проверено</th><th>На проверке</th></tr>
+  </thead>
+  <tbody>
+    {{range $i, $row := .Rows}}
+      <tr>
+        <td>{{inc $i}}</td>
+        <td>{{$row.PlayerName}}</td>
+        <td class="num strong">{{$row.Points}}</td>
+        <td class="num">{{$row.Answered}}</td>
+        <td class="num">{{if gt $row.Pending 0}}{{$row.Pending}}{{else}}—{{end}}</td>
+      </tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}
+<p><a class="linkish" href="/quizzes">К списку квизов</a></p>
+{{end}}

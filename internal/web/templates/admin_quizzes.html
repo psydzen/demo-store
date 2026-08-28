@@ -1,0 +1,34 @@
+{{define "title"}}Квизы{{end}}
+{{define "content"}}
+<h1>Квизы</h1>
+
+{{if gt .Pending 0}}
+  <p class="pending">На проверке {{.Pending}} ответ(ов). <a href="/admin/review">Открыть очередь</a></p>
+{{end}}
+
+<section class="card narrow">
+  <h2>Новый квиз</h2>
+  <form method="post" action="/admin/quizzes" class="stack">
+    <input type="text" name="title" placeholder="Название" required>
+    <input type="text" name="description" placeholder="Описание (необязательно)">
+    <button type="submit">Создать</button>
+  </form>
+</section>
+
+{{if not .Quizzes}}
+  <p class="muted">Квизов пока нет.</p>
+{{else}}
+<table class="grid">
+  <thead><tr><th>Название</th><th>Статус</th><th></th></tr></thead>
+  <tbody>
+    {{range .Quizzes}}
+      <tr>
+        <td><a href="/admin/quizzes/{{.ID}}">{{.Title}}</a></td>
+        <td><span class="badge {{.Status}}">{{.Status}}</span></td>
+        <td class="num"><a class="linkish" href="/leaderboard/{{.ID}}">Рейтинг</a></td>
+      </tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}
+{{end}}

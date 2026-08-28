@@ -1,0 +1,15 @@
+{{define "title"}}Вход{{end}}
+{{define "content"}}
+<section class="card narrow">
+  <h1>Вход по токену</h1>
+  <p class="muted">Токен выдаёт администратор. Он же служит паролем.</p>
+  {{with .Error}}<p class="error">{{.}}</p>{{end}}
+  <form method="post" action="/login" class="stack">
+    <label>
+      Токен
+      <input type="text" name="token" autocomplete="off" autofocus required>
+    </label>
+    <button type="submit">Войти</button>
+  </form>
+</section>
+{{end}}

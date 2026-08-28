@@ -1,0 +1,33 @@
+{{define "base"}}<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{block "title" .}}Квиз{{end}} — Квиз</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Квиз</a>
+    {{with .User}}
+      <nav>
+        {{if .IsAdmin}}
+          <a href="/admin/quizzes">Квизы</a>
+          <a href="/admin/players">Игроки</a>
+          <a href="/admin/review">Проверка</a>
+        {{else}}
+          <a href="/quizzes">Мои квизы</a>
+        {{end}}
+        <span class="who">{{.Name}}</span>
+        <form method="post" action="/logout"><button class="linkbtn">Выйти</button></form>
+      </nav>
+    {{end}}
+  </header>
+
+  <main>
+    {{with .Flash}}<p class="flash">{{.}}</p>{{end}}
+    {{block "content" .}}{{end}}
+  </main>
+</body>
+</html>{{end}}
