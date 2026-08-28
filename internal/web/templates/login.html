@@ -1,6 +1,7 @@
 {{define "title"}}Вход{{end}}
+{{define "bodyclass"}}centered{{end}}
 {{define "content"}}
-<section class="card narrow">
+<section class="card narrow login">
   <h1>Вход по токену</h1>
   <p class="muted">Токен выдаёт администратор. Он же служит паролем.</p>
   {{with .Error}}<p class="error">{{.}}</p>{{end}}

@@ -47,6 +47,22 @@ h3 { font-size: 1rem; margin: 0 0 4px; }
 }
 .narrow { max-width: 460px; }
 
+/* The login page has nothing but the form, so the card sits in the middle of
+   the screen instead of the top-left of the content column. */
+body.centered { min-height: 100vh; display: flex; flex-direction: column; }
+body.centered main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding-bottom: 24px;
+}
+.login { width: 100%; margin-bottom: 0; text-align: center; }
+.login h1 { margin-bottom: 8px; }
+.login label { text-align: left; }
+.login button { width: 100%; }
+
 .cards { list-style: none; padding: 0; margin: 0; }
 
 /* Two side-by-side lists on the player's quiz page. */
