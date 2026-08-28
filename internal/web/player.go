@@ -333,12 +333,22 @@ func (s *Server) nextQuestionView(r *http.Request, attemptID int64) (questionVie
 	}, nil
 }
 
+// leaderboardView feeds the "leaderboard_table" partial, shared by the results
+// page and the standalone leaderboard page.
+type leaderboardView struct {
+	Rows []domain.ScoreRow
+	// Highlight is the name of the player looking at the table, so their own
+	// row stands out. Empty for an admin.
+	Highlight string
+}
+
 type resultsPage struct {
 	base
-	Quiz     domain.Quiz
-	Points   int
-	Answered int
-	Pending  int
+	Quiz        domain.Quiz
+	Points      int
+	Answered    int
+	Pending     int
+	Leaderboard leaderboardView
 }
 
 // handleResults shows what the player scored.
@@ -358,20 +368,26 @@ func (s *Server) handleResults(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	board, err := s.leaderboardOf(r, attempt.QuizID)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 
 	s.mustRender(w, r, http.StatusOK, "results", resultsPage{
-		base:     s.baseOf(r),
-		Quiz:     q,
-		Points:   points,
-		Answered: answered,
-		Pending:  pending,
+		base:        s.baseOf(r),
+		Quiz:        q,
+		Points:      points,
+		Answered:    answered,
+		Pending:     pending,
+		Leaderboard: board,
 	})
 }
 
 type leaderboardPage struct {
 	base
-	Quiz domain.Quiz
-	Rows []domain.ScoreRow
+	Quiz        domain.Quiz
+	Leaderboard leaderboardView
 }
 
 // handleLeaderboard shows the standings of a quiz.
@@ -387,17 +403,31 @@ func (s *Server) handleLeaderboard(w http.ResponseWriter, r *http.Request) {
 		s.handleLookupError(w, r, err)
 		return
 	}
-	rows, err := s.db.Leaderboard(r.Context(), quizID)
+	board, err := s.leaderboardOf(r, quizID)
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
 
 	s.mustRender(w, r, http.StatusOK, "leaderboard", leaderboardPage{
-		base: s.baseOf(r),
-		Quiz: q,
-		Rows: rows,
+		base:        s.baseOf(r),
+		Quiz:        q,
+		Leaderboard: board,
 	})
+}
+
+// leaderboardOf loads the standings of a quiz and marks the current player.
+func (s *Server) leaderboardOf(r *http.Request, quizID int64) (leaderboardView, error) {
+	rows, err := s.db.Leaderboard(r.Context(), quizID)
+	if err != nil {
+		return leaderboardView{}, err
+	}
+
+	view := leaderboardView{Rows: rows}
+	if u := userFrom(r); u != nil && !u.IsAdmin() {
+		view.Highlight = u.Name
+	}
+	return view, nil
 }
 
 // playerAttempt loads the attempt named in the path and checks it belongs to

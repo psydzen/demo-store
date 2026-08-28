@@ -1,16 +1,23 @@
 {{define "title"}}Результат{{end}}
 {{define "content"}}
-<section class="card narrow">
-  <h1>{{.Quiz.Title}}</h1>
-  <p class="score">{{.Points}}</p>
-  <p class="muted">баллов набрано</p>
-  <p>Проверено ответов: {{.Answered}}</p>
-  {{if gt .Pending 0}}
-    <p class="pending">Ещё {{.Pending}} ответ(ов) ждут проверки администратором — баллы за них появятся позже.</p>
-  {{end}}
-  <div class="row">
-    <a class="button" href="/leaderboard/{{.Quiz.ID}}">Рейтинг</a>
-    <a class="linkish" href="/quizzes">К списку квизов</a>
-  </div>
-</section>
+<h1>{{.Quiz.Title}}</h1>
+
+<div class="columns">
+  <section class="card">
+    <h2 class="column-title">Ваш результат</h2>
+    <p class="score">{{.Points}}</p>
+    <p class="muted">баллов набрано</p>
+    <p>Проверено ответов: {{.Answered}}</p>
+    {{if gt .Pending 0}}
+      <p class="pending">Ещё {{.Pending}} ответ(ов) ждут проверки администратором — баллы за них появятся позже.</p>
+    {{end}}
+  </section>
+
+  <section>
+    <h2 class="column-title">Рейтинг</h2>
+    {{template "leaderboard_table" .Leaderboard}}
+  </section>
+</div>
+
+<p><a class="linkish" href="/quizzes">К списку квизов</a></p>
 {{end}}

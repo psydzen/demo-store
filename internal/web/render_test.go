@@ -20,7 +20,7 @@ func TestTemplatesParse(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"question", "review_list", "quiz_structure"} {
+	for _, name := range []string{"question", "review_list", "quiz_structure", "leaderboard_table"} {
 		if r.fragments.Lookup(name) == nil {
 			t.Errorf("fragment %q was not parsed", name)
 		}

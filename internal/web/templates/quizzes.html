@@ -38,8 +38,7 @@
           <h3>{{.Quiz.Title}}</h3>
           {{with .Quiz.Description}}<p class="muted">{{.}}</p>{{end}}
           <div class="row">
-            <a class="button" href="/results/{{.Attempt.ID}}">Результат</a>
-            <a class="linkish" href="/leaderboard/{{.Quiz.ID}}">Рейтинг</a>
+            <a class="button" href="/results/{{.Attempt.ID}}">Результат и рейтинг</a>
           </div>
         </li>
       {{end}}

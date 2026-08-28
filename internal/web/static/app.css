@@ -124,7 +124,7 @@ button.small { padding: 5px 10px; font-size: .85rem; }
   padding: 10px 12px;
   margin: 8px 0;
 }
-.score { font-size: 3rem; font-weight: 700; margin: 8px 0 0; }
+.score { font-size: 3rem; font-weight: 700; margin: 8px 0 0; line-height: 1.1; }
 
 .options { list-style: none; padding: 0; margin: 0 0 10px; }
 .options li { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
@@ -146,6 +146,8 @@ button.small { padding: 5px 10px; font-size: .85rem; }
 }
 .grid th { color: var(--muted); font-weight: 500; font-size: .85rem; }
 .num { text-align: right; }
+.grid tr.me { background: #eef4ff; }
+.grid tr.me td { font-weight: 600; }
 .strong { font-weight: 700; }
 
 .badge {

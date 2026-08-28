@@ -1,0 +1,23 @@
+{{define "leaderboard_table"}}
+{{if not .Rows}}
+  <p class="muted">Этот квиз ещё никто не проходил.</p>
+{{else}}
+<table class="grid">
+  <thead>
+    <tr><th>#</th><th>Игрок</th><th>Баллы</th><th>Проверено</th><th>На проверке</th></tr>
+  </thead>
+  <tbody>
+    {{$highlight := .Highlight}}
+    {{range $i, $row := .Rows}}
+      <tr{{if and $highlight (eq $row.PlayerName $highlight)}} class="me"{{end}}>
+        <td>{{inc $i}}</td>
+        <td>{{$row.PlayerName}}</td>
+        <td class="num strong">{{$row.Points}}</td>
+        <td class="num">{{$row.Answered}}</td>
+        <td class="num">{{if gt $row.Pending 0}}{{$row.Pending}}{{else}}—{{end}}</td>
+      </tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}
+{{end}}
