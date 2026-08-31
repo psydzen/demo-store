@@ -1,0 +1,29 @@
+{{define "title"}}{{.Structure.Quiz.Title}}{{end}}
+{{define "content"}}
+{{with .Structure.Quiz}}
+<div class="row spread">
+  <h1>{{.Title}} <span class="badge {{.Status}}">{{.Status}}</span></h1>
+  <div class="row">
+    {{if ne .Status "published"}}
+      <form method="post" action="/admin/quizzes/{{.ID}}/status">
+        <input type="hidden" name="status" value="published">
+        <button type="submit">Опубликовать</button>
+      </form>
+    {{end}}
+    {{if ne .Status "closed"}}
+      <form method="post" action="/admin/quizzes/{{.ID}}/status">
+        <input type="hidden" name="status" value="closed">
+        <button type="submit" class="secondary">Закрыть</button>
+      </form>
+    {{end}}
+    <form method="post" action="/admin/quizzes/{{.ID}}/delete"
+          onsubmit="return confirm('Удалить квиз со всеми раундами и ответами?')">
+      <button type="submit" class="danger">Удалить</button>
+    </form>
+  </div>
+</div>
+{{with .Description}}<p class="muted">{{.}}</p>{{end}}
+{{end}}
+
+{{template "quiz_structure" .Structure}}
+{{end}}

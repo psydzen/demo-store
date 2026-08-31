@@ -1,0 +1,53 @@
+{{define "title"}}Результат{{end}}
+{{define "content"}}
+<h1>{{.Quiz.Title}}</h1>
+
+<div class="columns">
+  <section class="card">
+    <h2 class="column-title">Ваш результат</h2>
+    <p class="score">{{.Points}}</p>
+    <p class="muted">баллов набрано</p>
+    <p>Проверено ответов: {{.Answered}}</p>
+    {{if gt .Pending 0}}
+      <p class="pending">Ещё {{.Pending}} ответ(ов) ждут проверки администратором — баллы за них появятся позже.</p>
+    {{end}}
+  </section>
+
+  <section>
+    <h2 class="column-title">Рейтинг</h2>
+    {{template "leaderboard_table" .Leaderboard}}
+  </section>
+</div>
+
+<section class="card">
+  <h2 class="column-title">Ваши ответы</h2>
+  {{if not .Answers}}
+    <p class="muted">Ответов нет.</p>
+  {{else}}
+    <ul class="answers">
+      {{range .Answers}}
+        <li class="answer-row">
+          <div class="answer-main">
+            <p class="progress">{{.RoundTitle}}</p>
+            <p class="answer-question">{{.QuestionText}}</p>
+            <p class="answer-given">{{.Answer}}</p>
+          </div>
+          <div class="answer-verdict">
+            {{if .Pending}}
+              <span class="verdict waiting">на проверке</span>
+            {{else if .Correct}}
+              <span class="verdict good">верно</span>
+              <span class="points">+{{.Points}}</span>
+            {{else}}
+              <span class="verdict bad">неверно</span>
+              <span class="points">{{.Points}}</span>
+            {{end}}
+          </div>
+        </li>
+      {{end}}
+    </ul>
+  {{end}}
+</section>
+
+<p><a class="linkish" href="/quizzes">К списку квизов</a></p>
+{{end}}

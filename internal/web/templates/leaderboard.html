@@ -1,0 +1,6 @@
+{{define "title"}}Рейтинг{{end}}
+{{define "content"}}
+<h1>Рейтинг — {{.Quiz.Title}}</h1>
+{{template "leaderboard_table" .Leaderboard}}
+<p><a class="linkish" href="/quizzes">К списку квизов</a></p>
+{{end}}
