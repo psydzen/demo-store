@@ -58,3 +58,11 @@ func crossFileStacktraceOK(w http.ResponseWriter, err error) {
 	// ok: go-stacktrace-in-response
 	http.Error(w, crossSafeText(err), http.StatusInternalServerError)
 }
+
+// crossFileStacktraceOKViaVariable is the same safe call, with the sanitised
+// message put in a variable before it reaches the sink.
+func crossFileStacktraceOKViaVariable(w http.ResponseWriter, err error) {
+	msg := crossSafeText(err)
+	// ok: go-stacktrace-in-response
+	http.Error(w, msg, http.StatusInternalServerError)
+}

@@ -14,7 +14,12 @@ rules:
       interfile: true
     pattern-sources:
       - pattern: "($ERR : error)"
-      # Fallback. Without cross-file type resolution Semgrep cannot infer that
+      # Fallback, needed only by the free engine. With --pro the typed source
+      # above is enough: cross-file resolution infers the type of the `err` in
+      # `x, err := pkg.F()`. Keeping it costs nothing under --pro, which finds
+      # exactly the same lines either way.
+      #
+      # Without cross-file type resolution Semgrep cannot infer that
       # the `err` of `x, err := pkg.F()` is an error, so the typed source above
       # matches only declared parameters. Go names error values `err` by
       # convention, so the name carries the type in practice.
