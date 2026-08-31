@@ -53,8 +53,7 @@ jobs:
             --config rules/semgrep \
             --exclude internal/analysisfixtures \
             --baseline-commit "$(git merge-base origin/${{ github.base_ref }} HEAD)" \
-            --sarif --output semgrep.sarif \
-            --error
+            --sarif --output semgrep.sarif
 
       - name: Scan the whole tree
         if: github.event_name == 'push'
@@ -72,6 +71,13 @@ jobs:
         with:
           sarif_file: semgrep.sarif
           category: semgrep-interproc
+
+      # Three rules block and three advise, so the exit code follows the
+      # severity rather than the mere existence of a finding. Everything is in
+      # the security tab either way.
+      - name: Stop only on the blocking rules
+        if: always() && hashFiles('semgrep.sarif') != ''
+        run: python3 scripts/gate_sarif.py semgrep.sarif
 
   fixtures:
     name: Rules are not empty
