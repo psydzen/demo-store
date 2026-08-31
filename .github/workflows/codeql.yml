@@ -68,6 +68,16 @@ jobs:
     #   uses: actions/setup-example@v1
 
     # Initializes the CodeQL tools for scanning.
+    # Must run BEFORE codeql-action/init: init puts a wrapper `go` on PATH to
+    # trace the build, and installing Go afterwards replaces it, leaving CodeQL
+    # with an empty database.
+    - name: Set up Go
+      if: matrix.language == 'go'
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+        cache: true
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4
       with:
@@ -87,13 +97,6 @@ jobs:
     # to build your code.
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-    - name: Set up Go
-      if: matrix.language == 'go'
-      uses: actions/setup-go@v5
-      with:
-        go-version-file: go.mod
-        cache: true
-
     # The database has to come from a real build: the rules follow types and
     # the call graph across packages, which autobuild does not always produce.
     - name: Build
