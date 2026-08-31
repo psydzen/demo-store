@@ -4,27 +4,35 @@ rules:
     languages: [go]
     severity: ERROR
     message: >-
-      The text of an error reaches the client. Errors carry file paths, SQL
-      fragments and wrapped internals; log them and return a fixed message.
+      The text of an error reaches the client over HTTP or gRPC. Errors carry
+      file paths, SQL fragments and wrapped internals; log the error and return
+      a fixed message instead.
     metadata:
       category: security
       rule-family: interprocedural-comparison
     options:
       interfile: true
     pattern-sources:
-      - pattern: "(err : error)"
+      - pattern: "($ERR : error)"
+      # Fallback. Without cross-file type resolution Semgrep cannot infer that
+      # the `err` of `x, err := pkg.F()` is an error, so the typed source above
+      # matches only declared parameters. Go names error values `err` by
+      # convention, so the name carries the type in practice.
+      - patterns:
+          - pattern: $ERR
+          - metavariable-regex:
+              metavariable: $ERR
+              regex: ^(err|e|[a-z][A-Za-z0-9]*Err(or)?)$
+      - pattern: $X.Error()
     pattern-sinks:
       - patterns:
           - pattern-either:
               - patterns:
                   - pattern: http.Error($W, $MSG, $CODE)
                   - focus-metavariable: $MSG
-              - patterns:
-                  - pattern: fmt.Fprintf($W, $FMT, ...)
-                  - focus-metavariable: $FMT
+              - pattern: "fmt.Fprintf(($W : http.ResponseWriter), ...)"
+              - pattern: "fmt.Fprint(($W : http.ResponseWriter), ...)"
               - patterns:
                   - pattern: status.Error($CODE, $MSG)
                   - focus-metavariable: $MSG
-              - patterns:
-                  - pattern: status.Errorf($CODE, $FMT, ...)
-                  - focus-metavariable: $FMT
+              - pattern: status.Errorf($CODE, ...)

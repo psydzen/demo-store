@@ -1,0 +1,5 @@
+name: spnd/go-interproc
+version: 0.1.0
+library: false
+dependencies:
+  codeql/go-all: "*"

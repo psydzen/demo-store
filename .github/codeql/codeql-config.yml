@@ -1,0 +1,15 @@
+name: "SPND Go interprocedural rules"
+
+# The six rules of this comparison, on top of GitHub's default Go queries.
+queries:
+  - uses: security-and-quality
+  - uses: ./rules/codeql
+
+paths-ignore:
+  # Generated protobuf stubs.
+  - internal/grpcapi/paymentspb
+  # The rule fixtures: they are deliberately wrong and must not reach the
+  # security tab.
+  - internal/analysisfixtures
+  # Vendored asset.
+  - internal/web/static/htmx.min.js

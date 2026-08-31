@@ -1,0 +1,32 @@
+rules:
+  - id: go-logger-without-logtag-context
+    languages: [go]
+    severity: WARNING
+    message: >-
+      A log line is written through slog directly inside a function that has a
+      request context. The line loses the request tags. Use
+      logtag.From(ctx).Info/Error instead.
+    metadata:
+      category: best-practice
+      rule-family: interprocedural-comparison
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              func $F(..., $CTX context.Context, ...) { ... }
+          - pattern-inside: |
+              func ($RECV $T) $F(..., $CTX context.Context, ...) { ... }
+          - pattern-inside: |
+              func $F(..., $R *http.Request, ...) { ... }
+          - pattern-inside: |
+              func ($RECV $T) $F(..., $R *http.Request, ...) { ... }
+      - pattern-either:
+          - pattern: slog.Debug(...)
+          - pattern: slog.Info(...)
+          - pattern: slog.Warn(...)
+          - pattern: slog.Error(...)
+          - pattern: slog.Default().$LEVEL(...)
+          - patterns:
+              - pattern: "($LOG : *slog.Logger).$LEVEL(...)"
+              - metavariable-regex:
+                  metavariable: $LEVEL
+                  regex: ^(Debug|Info|Warn|Error)$

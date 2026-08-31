@@ -1,0 +1,58 @@
+rules:
+  - id: go-handler-without-metrics
+    languages: [go]
+    severity: WARNING
+    message: >-
+      This request handler never calls obs.Observe, so the call is missing from
+      the HTTP/gRPC request metrics. Known limit: Semgrep only sees the body of
+      the handler, so a handler that gets its metrics from a server-wide
+      interceptor is reported here as well.
+    metadata:
+      category: best-practice
+      rule-family: interprocedural-comparison
+      confidence: LOW
+    pattern-either:
+      - patterns:
+          - pattern: |
+              func ($RECV $T) $F($CTX context.Context, $REQ *$P) (*$Q, error) {
+                ...
+              }
+          - pattern-not: |
+              func ($RECV $T) $F($CTX context.Context, $REQ *$P) (*$Q, error) {
+                ...
+                obs.Observe(...)
+                ...
+              }
+      - patterns:
+          - pattern: |
+              func ($RECV $T) $F($CTX context.Context, $REQ *$P) ($RESP *$Q, $ERR error) {
+                ...
+              }
+          - pattern-not: |
+              func ($RECV $T) $F($CTX context.Context, $REQ *$P) ($RESP *$Q, $ERR error) {
+                ...
+                obs.Observe(...)
+                ...
+              }
+      - patterns:
+          - pattern: |
+              func $F($W http.ResponseWriter, $R *http.Request) {
+                ...
+              }
+          - pattern-not: |
+              func $F($W http.ResponseWriter, $R *http.Request) {
+                ...
+                obs.Observe(...)
+                ...
+              }
+      - patterns:
+          - pattern: |
+              func ($RECV $T) $F($W http.ResponseWriter, $R *http.Request) {
+                ...
+              }
+          - pattern-not: |
+              func ($RECV $T) $F($W http.ResponseWriter, $R *http.Request) {
+                ...
+                obs.Observe(...)
+                ...
+              }

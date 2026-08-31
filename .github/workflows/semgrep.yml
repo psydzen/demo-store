@@ -1,0 +1,73 @@
+name: Semgrep
+
+# The repository's only gate today is a stage inside the Dockerfile, which runs
+# on the whole tree and cannot tell a new finding from an old one. This job is
+# separate, runs on pull requests, and reports only what the pull request adds.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  semgrep:
+    name: Interprocedural rules
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # --baseline-commit needs the history the pull request branched from.
+          fetch-depth: 0
+
+      - name: Scan the pull request
+        if: github.event_name == 'pull_request'
+        env:
+          # Interfile taint is a Pro feature. Without this token semgrep falls
+          # back to the single-file engine and three of the six rules quietly
+          # lose their cross-package findings.
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        run: |
+          semgrep --pro \
+            --config rules/semgrep \
+            --exclude internal/analysisfixtures \
+            --baseline-commit "$(git merge-base origin/${{ github.base_ref }} HEAD)" \
+            --sarif --output semgrep.sarif \
+            --error
+
+      - name: Scan the whole tree
+        if: github.event_name == 'push'
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        run: |
+          semgrep --pro \
+            --config rules/semgrep \
+            --exclude internal/analysisfixtures \
+            --sarif --output semgrep.sarif
+
+      - name: Upload the findings
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep-interproc
+
+  fixtures:
+    name: Rules are not empty
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:latest
+    steps:
+      - uses: actions/checkout@v4
+      # Every rule owns a `// ruleid:` case and an `// ok:` case. If a rule
+      # stops matching its own fixture, it stopped working.
+      - name: Check the fixture corpus
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        run: PYTHONPATH=scripts python3 scripts/check_semgrep.py --pro
