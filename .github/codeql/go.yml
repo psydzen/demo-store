@@ -6,13 +6,12 @@ queries:
   # The six rules of this repository.
   - uses: ./rules/codeql
 
-# paths-ignore is applied when the results are interpreted, not when the code is
-# extracted. That is what we want: the fixtures and the generated stubs stay in
-# the database, so the call graph is complete, but they raise no alerts.
+# With a traced Go build, paths-ignore does NOT suppress findings: the extractor
+# follows the compiler, so every package `go build ./...` compiles is analysed.
+# The fixtures and the generated stubs are therefore filtered out of the SARIF
+# in the workflow, by scripts/strip_fixture_results.py, after the corpus has
+# been checked and before anything is published.
+#
+# This entry still helps for files no Go build touches.
 paths-ignore:
-  # Generated protobuf stubs.
-  - internal/grpcapi/paymentspb
-  # The rule fixtures: deliberately wrong code that must not reach the security tab.
-  - internal/analysisfixtures
-  # Vendored asset.
   - internal/web/static/htmx.min.js

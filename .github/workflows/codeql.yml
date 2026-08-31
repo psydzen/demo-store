@@ -108,3 +108,27 @@ jobs:
       uses: github/codeql-action/analyze@v4
       with:
         category: "/language:${{matrix.language}}"
+        # Hold the SARIF back so the fixtures can be checked and then removed
+        # from it before anything is published.
+        output: sarif-results
+        upload: failure-only
+
+    # Every rule owns `// ruleid:` and `// ok:` cases in the corpus. If a rule
+    # stops matching its own, it stopped working — and unlike Semgrep, CodeQL
+    # is expected to score all of them.
+    - name: Check the fixture corpus
+      if: matrix.language == 'go'
+      run: PYTHONPATH=scripts python3 scripts/check_sarif.py codeql sarif-results/go.sarif
+
+    # paths-ignore does not suppress these: with a traced Go build the
+    # extractor follows the compiler, so everything `go build ./...` compiles
+    # is analysed regardless of the config.
+    - name: Drop the fixture findings
+      if: matrix.language == 'go'
+      run: python3 scripts/strip_fixture_results.py sarif-results/go.sarif
+
+    - name: Upload the findings
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: sarif-results
+        category: "/language:${{matrix.language}}"
