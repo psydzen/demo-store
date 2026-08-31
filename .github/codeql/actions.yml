@@ -1,0 +1,6 @@
+name: "Actions: GitHub's own queries"
+
+# The Go pack in go.yml is not applicable here; this language runs the default
+# query set only.
+queries:
+  - uses: security-and-quality

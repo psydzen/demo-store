@@ -1,0 +1,6 @@
+# Scratch output of the engine comparison.
+.analysis/
+# Generated protobuf stubs: rules are written for hand-written code.
+internal/grpcapi/paymentspb/
+# Vendored asset.
+internal/web/static/htmx.min.js

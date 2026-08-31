@@ -1,0 +1,43 @@
+rules:
+  - id: go-sensitive-data-in-log-tags
+    mode: taint
+    languages: [go]
+    severity: ERROR
+    message: >-
+      Card data or personal data reaches a log tag or a trace attribute. Log the
+      masked form instead - Masked(), the last four digits, or an identifier.
+    metadata:
+      category: security
+      rule-family: interprocedural-comparison
+    options:
+      interfile: true
+    pattern-sources:
+      - patterns:
+          - pattern: $X.$FIELD
+          - metavariable-regex:
+              metavariable: $FIELD
+              regex: ^(PAN|Pan|CardNumber|CVV|Cvv|CVC|Cvc|Holder|CardHolder|FullName|Email|Phone|TaxID|TaxId|Passport|SSN)$
+      - patterns:
+          - pattern: $X.$GETTER()
+          - metavariable-regex:
+              metavariable: $GETTER
+              regex: ^Get(Pan|CardNumber|Cvv|Cvc|Holder|CardHolder|FullName|Email|Phone|TaxId|Passport|Ssn)$
+    pattern-sanitizers:
+      # A context never counts as sensitive itself. Without this the taint
+      # placed on ctx by logtag.With would repeat the same defect on every log
+      # line that follows.
+      - pattern: "($C : context.Context)"
+      - pattern: $C.Masked()
+      - pattern: last4(...)
+      - pattern: $X.CardLast4
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - patterns:
+                  - pattern: logtag.With($CTX, $KEY, $VALUE)
+                  - focus-metavariable: $VALUE
+              - pattern: logtag.From($CTX).$LEVEL(...)
+              - pattern: slog.$LEVEL(...)
+              - pattern: slog.Default().$LEVEL(...)
+              - pattern: "($LOG : *slog.Logger).$LEVEL(...)"
+              - pattern: $SPAN.SetAttributes(...)

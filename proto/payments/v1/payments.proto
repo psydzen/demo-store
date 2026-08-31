@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package payments.v1;
+
+option go_package = "github.com/spndxyz/quiz/internal/grpcapi/paymentspb;paymentspb";
+
+// PaymentsService is the public API players talk to.
+service PaymentsService {
+  rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
+  rpc SearchPayments(SearchPaymentsRequest) returns (SearchPaymentsResponse);
+  rpc Refund(RefundRequest) returns (RefundResponse);
+}
+
+// AdminPaymentsService is the internal API, served on a separate port.
+service AdminPaymentsService {
+  rpc PaymentHistory(PaymentHistoryRequest) returns (SearchPaymentsResponse);
+  rpc ExportPayments(ExportPaymentsRequest) returns (ExportPaymentsResponse);
+}
+
+message Card {
+  string pan = 1;
+  string cvv = 2;
+  string holder = 3;
+  int32 expiry_month = 4;
+  int32 expiry_year = 5;
+}
+
+message Payer {
+  string full_name = 1;
+  string email = 2;
+  string phone = 3;
+  string tax_id = 4;
+}
+
+message CreatePaymentRequest {
+  int64 user_id = 1;
+  int64 quiz_id = 2;
+  int64 amount = 3;
+  string currency = 4;
+  Card card = 5;
+  Payer payer = 6;
+}
+
+message Payment {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 quiz_id = 3;
+  int64 amount = 4;
+  string currency = 5;
+  string card_last4 = 6;
+  string status = 7;
+}
+
+message CreatePaymentResponse {
+  Payment payment = 1;
+}
+
+message SearchPaymentsRequest {
+  string status = 1;
+  string order_by = 2;
+}
+
+message SearchPaymentsResponse {
+  repeated Payment payments = 1;
+}
+
+message RefundRequest {
+  int64 payment_id = 1;
+  Card card = 2;
+  string reason = 3;
+}
+
+message RefundResponse {
+  string status = 1;
+}
+
+message PaymentHistoryRequest {
+  int64 user_id = 1;
+}
+
+message ExportPaymentsRequest {
+  string status = 1;
+}
+
+message ExportPaymentsResponse {
+  bytes csv = 1;
+}

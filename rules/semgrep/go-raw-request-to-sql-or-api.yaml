@@ -1,0 +1,46 @@
+rules:
+  - id: go-raw-request-to-sql-or-api
+    mode: taint
+    languages: [go]
+    severity: ERROR
+    message: >-
+      Data taken straight from the request is spliced into an SQL statement or
+      into the address of an outbound call. Pass it as a bind parameter, or
+      validate it against a fixed list first.
+    metadata:
+      category: security
+      rule-family: interprocedural-comparison
+    options:
+      interfile: true
+    pattern-sources:
+      - pattern: $R.URL.Query().Get(...)
+      - pattern: $R.FormValue(...)
+      - pattern: $R.PostFormValue(...)
+      - pattern: $R.PathValue(...)
+      - pattern: $R.Header.Get(...)
+      # Protobuf getters: in a gRPC service the request message is the request.
+      - patterns:
+          - pattern: $REQ.$GETTER()
+          - metavariable-regex:
+              metavariable: $GETTER
+              regex: ^Get[A-Z]
+    pattern-sanitizers:
+      - pattern: strconv.ParseInt(...)
+      - pattern: strconv.Atoi(...)
+      - pattern: url.QueryEscape(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - patterns:
+                  - pattern-either:
+                      - pattern: $POOL.Query($CTX, $SQL, ...)
+                      - pattern: $POOL.QueryRow($CTX, $SQL, ...)
+                      - pattern: $POOL.Exec($CTX, $SQL, ...)
+                  - focus-metavariable: $SQL
+              - patterns:
+                  - pattern-either:
+                      - pattern: http.Get($URL)
+                      - pattern: http.Post($URL, ...)
+                      - pattern: http.NewRequest($M, $URL, ...)
+                      - pattern: http.NewRequestWithContext($C, $M, $URL, ...)
+                  - focus-metavariable: $URL

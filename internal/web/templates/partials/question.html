@@ -1,0 +1,42 @@
+{{define "question"}}
+{{if .Finished}}
+  <section class="card narrow">
+    <h2>Квиз пройден</h2>
+    <p class="muted">Ответы записаны.</p>
+    <a class="button" href="/results/{{.AttemptID}}">Посмотреть результат</a>
+  </section>
+{{else}}
+  <section class="card">
+    <p class="progress">{{.RoundTitle}} · вопрос {{.Number}} из {{.Total}}</p>
+    <h2>{{.Question.Text}}</h2>
+    {{with .Error}}<p class="error">{{.}}</p>{{end}}
+
+    <form class="stack"
+          hx-post="/play/{{.AttemptID}}/answer"
+          hx-target="#play"
+          hx-swap="innerHTML">
+      <input type="hidden" name="question_id" value="{{.Question.ID}}">
+
+      {{if eq .Question.Kind "choice"}}
+        <ul class="options">
+          {{range .Question.Options}}
+            <li>
+              <label>
+                <input type="radio" name="option_id" value="{{.ID}}" required>
+                <span>{{.Text}}</span>
+              </label>
+            </li>
+          {{end}}
+        </ul>
+      {{else}}
+        <label>
+          Ваш ответ
+          <input type="text" name="free_text" autocomplete="off" required>
+        </label>
+      {{end}}
+
+      <button type="submit">Ответить</button>
+    </form>
+  </section>
+{{end}}
+{{end}}

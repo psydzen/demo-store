@@ -1,0 +1,17 @@
+name: "Go: SPND interprocedural rules"
+
+queries:
+  # GitHub's own Go queries.
+  - uses: security-and-quality
+  # The six rules of this repository.
+  - uses: ./rules/codeql
+
+# With a traced Go build, paths-ignore does NOT suppress findings: the extractor
+# follows the compiler, so every package `go build ./...` compiles is analysed.
+# The fixtures and the generated stubs are therefore filtered out of the SARIF
+# in the workflow, by scripts/strip_fixture_results.py, after the corpus has
+# been checked and before anything is published.
+#
+# This entry still helps for files no Go build touches.
+paths-ignore:
+  - internal/web/static/htmx.min.js

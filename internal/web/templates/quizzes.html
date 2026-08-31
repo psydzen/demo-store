@@ -1,0 +1,48 @@
+{{define "title"}}Мои квизы{{end}}
+{{define "content"}}
+<h1>Квизы</h1>
+<div class="columns">
+  <section>
+    <h2 class="column-title">Доступные</h2>
+    {{if not .Active}}
+      <p class="muted">Нет квизов, которые можно пройти.</p>
+    {{end}}
+    <ul class="cards">
+      {{range .Active}}
+        <li class="card">
+          <h3>{{.Quiz.Title}}</h3>
+          {{with .Quiz.Description}}<p class="muted">{{.}}</p>{{end}}
+          <div class="row">
+            {{if .Started}}
+              <a class="button" href="/play/{{.Attempt.ID}}">Продолжить</a>
+            {{else}}
+              <form method="post" action="/quizzes/{{.Quiz.ID}}/start">
+                <button type="submit">Начать</button>
+              </form>
+            {{end}}
+            <a class="linkish" href="/leaderboard/{{.Quiz.ID}}">Рейтинг</a>
+          </div>
+        </li>
+      {{end}}
+    </ul>
+  </section>
+
+  <section>
+    <h2 class="column-title">Пройденные</h2>
+    {{if not .Finished}}
+      <p class="muted">Пока ничего не пройдено.</p>
+    {{end}}
+    <ul class="cards">
+      {{range .Finished}}
+        <li class="card">
+          <h3>{{.Quiz.Title}}</h3>
+          {{with .Quiz.Description}}<p class="muted">{{.}}</p>{{end}}
+          <div class="row">
+            <a class="button" href="/results/{{.Attempt.ID}}">Результат и рейтинг</a>
+          </div>
+        </li>
+      {{end}}
+    </ul>
+  </section>
+</div>
+{{end}}

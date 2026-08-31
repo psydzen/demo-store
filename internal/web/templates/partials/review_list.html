@@ -1,0 +1,30 @@
+{{define "review_list"}}
+<div id="review-list">
+  {{if not .Rows}}
+    <p class="muted">Очередь пуста — все ответы проверены.</p>
+  {{else}}
+    <ul class="cards">
+      {{range .Rows}}
+        <li class="card">
+          <p class="progress">{{.QuizTitle}} · {{.RoundTitle}} · {{.PlayerName}}</p>
+          <h2>{{.QuestionText}}</h2>
+          <p class="answer">{{.FreeText}}</p>
+          {{with .AdminHint}}<p class="hint">Подсказка: {{.}}</p>{{end}}
+          <div class="row">
+            <form hx-post="/admin/review/{{.ResponseID}}"
+                  hx-target="#review-list" hx-swap="outerHTML">
+              <input type="hidden" name="correct" value="true">
+              <button type="submit">Верно</button>
+            </form>
+            <form hx-post="/admin/review/{{.ResponseID}}"
+                  hx-target="#review-list" hx-swap="outerHTML">
+              <input type="hidden" name="correct" value="false">
+              <button type="submit" class="danger">Неверно</button>
+            </form>
+          </div>
+        </li>
+      {{end}}
+    </ul>
+  {{end}}
+</div>
+{{end}}

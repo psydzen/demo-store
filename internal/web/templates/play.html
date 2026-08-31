@@ -1,0 +1,7 @@
+{{define "title"}}{{.Quiz.Title}}{{end}}
+{{define "content"}}
+<h1>{{.Quiz.Title}}</h1>
+<div id="play">
+  {{template "question" .Question}}
+</div>
+{{end}}

@@ -1,0 +1,30 @@
+{{define "title"}}Игроки{{end}}
+{{define "content"}}
+<h1>Игроки</h1>
+
+<section class="card narrow">
+  <h2>Новый игрок</h2>
+  <form method="post" action="/admin/players" class="row">
+    <input type="text" name="name" placeholder="Имя игрока" required>
+    <button type="submit">Создать</button>
+  </form>
+  <p class="muted">Токен для входа сгенерируется автоматически.</p>
+</section>
+
+{{if not .Players}}
+  <p class="muted">Игроков пока нет.</p>
+{{else}}
+<table class="grid">
+  <thead><tr><th>Имя</th><th>Токен</th><th>Создан</th></tr></thead>
+  <tbody>
+    {{range .Players}}
+      <tr>
+        <td>{{.Name}}</td>
+        <td><code>{{.Token}}</code></td>
+        <td class="muted">{{.CreatedAt.Format "02.01.2006 15:04"}}</td>
+      </tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}
+{{end}}

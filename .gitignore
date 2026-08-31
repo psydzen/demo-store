@@ -1,0 +1,6 @@
+/quiz
+/bin/
+.env
+
+# Scratch output of the static-analysis comparison.
+.analysis/
