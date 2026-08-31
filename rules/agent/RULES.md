@@ -54,8 +54,13 @@ Inside a function that has a request context, log through
 Every HTTP handler and every gRPC method must be counted in the request
 metrics.
 
-- **Entry points**: methods registered on a `grpc.Server`; functions registered
-  on an `http.ServeMux`.
+- **Entry points**: gRPC methods — a method on a service type that some
+  `Register…Server` call registers. HTTP handlers — a function with the
+  `(http.ResponseWriter, *http.Request)` signature and no results, recognised by
+  that signature alone. The asymmetry is deliberate: registration decides
+  whether a gRPC method sits behind an interceptor, so it has to be followed;
+  Go's HTTP middleware has no equivalent single wiring point, so the signature
+  is what all three engines key on.
 - **Satisfied when** `obs.Observe` is reached — either directly in the handler,
   or through an interceptor or middleware the handler is registered behind.
   **Follow the registration**: a server built with
