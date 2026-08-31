@@ -84,6 +84,9 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("POST /admin/questions/{id}/delete", admin(s.handleDeleteQuestion))
 	mux.Handle("POST /admin/questions/{id}/options", admin(s.handleCreateOption))
 	mux.Handle("POST /admin/options/{id}/delete", admin(s.handleDeleteOption))
+	mux.Handle("GET /admin/payments", admin(s.handlePaymentSearch))
+	mux.Handle("GET /admin/payments/receipt", admin(s.handlePaymentReceipt))
+	mux.Handle("GET /admin/payers", admin(s.handlePayerProfile))
 	mux.Handle("GET /admin/review", admin(s.handleReviewQueue))
 	mux.Handle("POST /admin/review/{id}", admin(s.handleReview))
 

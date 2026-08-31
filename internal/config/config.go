@@ -12,6 +12,10 @@ import (
 type Config struct {
 	// Addr is the TCP address the HTTP server listens on.
 	Addr string
+	// GRPCAddr is the TCP address the player-facing gRPC server listens on.
+	GRPCAddr string
+	// GRPCAdminAddr is the TCP address the internal gRPC server listens on.
+	GRPCAdminAddr string
 	// DatabaseURL is the Postgres connection string.
 	DatabaseURL string
 	// AdminToken, when set, replaces the seeded admin token on startup.
@@ -28,6 +32,8 @@ const minAdminTokenLen = 16
 func Load() (Config, error) {
 	cfg := Config{
 		Addr:            env("ADDR", ":8080"),
+		GRPCAddr:        env("GRPC_ADDR", ":9090"),
+		GRPCAdminAddr:   env("GRPC_ADMIN_ADDR", ":9091"),
 		DatabaseURL:     env("DATABASE_URL", ""),
 		AdminToken:      strings.TrimSpace(os.Getenv("ADMIN_TOKEN")),
 		SessionLifetime: 12 * time.Hour,

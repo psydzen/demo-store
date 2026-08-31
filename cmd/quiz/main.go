@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,8 +19,10 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"google.golang.org/grpc"
 
 	"github.com/spndxyz/quiz/internal/config"
+	"github.com/spndxyz/quiz/internal/grpcapi"
 	"github.com/spndxyz/quiz/internal/storage"
 	"github.com/spndxyz/quiz/internal/web"
 	"github.com/spndxyz/quiz/migrations"
@@ -85,6 +88,9 @@ func run(log *slog.Logger) error {
 		IdleTimeout:       60 * time.Second,
 	}
 
+	public := grpcapi.NewPublicServer(db, log)
+	admin := grpcapi.NewAdminServer(db)
+
 	errc := make(chan error, 1)
 	go func() {
 		log.Info("listening", "addr", cfg.Addr)
@@ -92,6 +98,8 @@ func run(log *slog.Logger) error {
 			errc <- err
 		}
 	}()
+	go serveGRPC(log, public, cfg.GRPCAddr, "public", errc)
+	go serveGRPC(log, admin, cfg.GRPCAdminAddr, "admin", errc)
 
 	select {
 	case err := <-errc:
@@ -100,12 +108,28 @@ func run(log *slog.Logger) error {
 		log.Info("shutting down")
 	}
 
+	public.GracefulStop()
+	admin.GracefulStop()
+
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		return fmt.Errorf("shutdown: %w", err)
 	}
 	return nil
+}
+
+// serveGRPC listens on addr and blocks until the server stops.
+func serveGRPC(log *slog.Logger, srv *grpc.Server, addr, name string, errc chan<- error) {
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		errc <- fmt.Errorf("listen %s grpc: %w", name, err)
+		return
+	}
+	log.Info("grpc listening", "name", name, "addr", addr)
+	if err := srv.Serve(lis); err != nil {
+		errc <- fmt.Errorf("serve %s grpc: %w", name, err)
+	}
 }
 
 // applyMigrations brings the schema up to date using the embedded SQL files.
