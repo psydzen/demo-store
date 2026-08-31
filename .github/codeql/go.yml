@@ -1,0 +1,18 @@
+name: "Go: SPND interprocedural rules"
+
+queries:
+  # GitHub's own Go queries.
+  - uses: security-and-quality
+  # The six rules of this repository.
+  - uses: ./rules/codeql
+
+# paths-ignore is applied when the results are interpreted, not when the code is
+# extracted. That is what we want: the fixtures and the generated stubs stay in
+# the database, so the call graph is complete, but they raise no alerts.
+paths-ignore:
+  # Generated protobuf stubs.
+  - internal/grpcapi/paymentspb
+  # The rule fixtures: deliberately wrong code that must not reach the security tab.
+  - internal/analysisfixtures
+  # Vendored asset.
+  - internal/web/static/htmx.min.js
